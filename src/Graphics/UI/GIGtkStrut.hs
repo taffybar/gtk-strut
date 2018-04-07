@@ -1,8 +1,14 @@
 module Graphics.UI.GIGtkStrut where
 
+import           Control.Monad
+import           Control.Monad.IO.Class
+import           Control.Monad.Trans.Class
+import           Control.Monad.Trans.Maybe
 import           Data.Int
+import           Data.Text
 import qualified GI.Gdk as Gdk
 import qualified GI.Gtk as Gtk
+import           Graphics.UI.EWMHStrut
 
 data StrutPosition = TopPos | BottomPos | LeftPos | RightPos
 data StrutAlignment = Beginning | Center | End
@@ -16,8 +22,10 @@ data StrutConfig = StrutConfig
   , strutMonitor :: Int32
   , strutPosition :: StrutPosition
   , strutAlignment :: StrutAlignment
+  , strutDisplayName :: Maybe Text
   }
 
+buildWindow :: MonadIO m => StrutConfig -> m Gtk.Window
 buildWindow StrutConfig
               { strutWidth = widthSize
               , strutHeight = heightSize
@@ -26,15 +34,17 @@ buildWindow StrutConfig
               , strutMonitor = monitorNumber
               , strutPosition = position
               , strutAlignment = alignment
+              , strutDisplayName = displayName
               } = do
+  Just display <- maybe Gdk.displayGetDefault Gdk.displayOpen displayName
+  Just monitor <- Gdk.displayGetMonitor display monitorNumber
+  screen <- Gdk.displayGetDefaultScreen display
+
   window <- Gtk.windowNew Gtk.WindowTypeToplevel
   Gtk.windowSetTypeHint window Gdk.WindowTypeHintDock
   geometry <- Gdk.newZeroGeometry
 
-  screen <- Gtk.windowGetScreen window
-  display <- Gdk.screenGetDisplay screen
-
-  monitorGeometry <- Gdk.screenGetMonitorGeometry screen monitorNumber
+  monitorGeometry <- Gdk.monitorGetGeometry monitor
   monitorWidth <- Gdk.getRectangleWidth monitorGeometry
   monitorHeight <- Gdk.getRectangleHeight monitorGeometry
   monitorX <- Gdk.getRectangleX monitorGeometry
@@ -56,7 +66,9 @@ buildWindow StrutConfig
   Gtk.windowSetGeometryHints window (Nothing :: Maybe Gtk.Window)
        (Just geometry) allHints
 
-  let getAlignedPos dimensionPos dpadding monitorSize barSize =
+  let paddedHeight = (height + 2 * ypadding)
+      paddedWidth = (width + 2 * xpadding)
+      getAlignedPos dimensionPos dpadding monitorSize barSize =
         dimensionPos +
         case alignment of
           Beginning -> dpadding
@@ -64,15 +76,48 @@ buildWindow StrutConfig
           End -> monitorSize - barSize - dpadding
       xAligned = getAlignedPos monitorX xpadding monitorWidth width
       yAligned = getAlignedPos monitorY ypadding monitorHeight height
-
-  let (xPos, yPos) =
+      (xPos, yPos) =
         case position of
           TopPos -> (xAligned, monitorY + ypadding)
-          BottomPos -> (xAligned, monitorY + monitorHeight - (height + 2 * ypadding))
+          BottomPos -> (xAligned, monitorY + monitorHeight - paddedHeight)
           LeftPos -> (monitorX + xpadding, yAligned)
-          RightPos -> (monitorX + monitorWidth - (width + 2 * xpadding), yAligned)
+          RightPos -> (monitorX + monitorWidth - paddedWidth, yAligned)
 
+  Gtk.windowSetScreen window screen
   Gtk.windowMove window xPos yPos
+
+  let ewmhSettings =
+        case position of
+          TopPos ->
+            zeroStrutSettings
+            { _top = paddedHeight
+            , _top_start_x = xPos - xpadding
+            , _top_end_x = xPos + width + xpadding
+            }
+          BottomPos ->
+            zeroStrutSettings
+            { _bottom = paddedHeight
+            , _bottom_start_x = xPos - xpadding
+            , _bottom_end_x = xPos + width + xpadding
+            }
+          LeftPos ->
+            zeroStrutSettings
+            { _left = paddedWidth
+            , _left_start_y = yPos - ypadding
+            , _left_end_y = yPos + height + ypadding
+            }
+          RightPos ->
+            zeroStrutSettings
+            { _right = paddedWidth
+            , _right_start_y = yPos - ypadding
+            , _right_end_y = yPos + height + ypadding
+            }
+      setStrutProperties =
+        void $ runMaybeT $ do
+          gdkWindow <- MaybeT $ Gtk.widgetGetWindow window
+          lift $ setStrut gdkWindow ewmhSettings
+
+  Gtk.onWidgetRealize window setStrutProperties
 
   return window
 
