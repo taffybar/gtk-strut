@@ -5,6 +5,7 @@ import           Control.Monad.IO.Class
 import           Control.Monad.Trans.Class
 import           Control.Monad.Trans.Maybe
 import           Data.Int
+import           Data.Ratio
 import           Data.Text
 import qualified GI.Gdk as Gdk
 import qualified GI.Gtk as Gtk
@@ -12,7 +13,7 @@ import           Graphics.UI.EWMHStrut
 
 data StrutPosition = TopPos | BottomPos | LeftPos | RightPos
 data StrutAlignment = Beginning | Center | End
-data StrutSize = ExactSize Int32 | Percentage Int32
+data StrutSize = ExactSize Int32 | ScreenRatio Rational
 
 data StrutConfig = StrutConfig
   { strutWidth :: StrutSize
@@ -26,8 +27,8 @@ data StrutConfig = StrutConfig
   }
 
 defaultStrutConfig = StrutConfig
-  { strutWidth = Percentage 100
-  , strutHeight = Percentage 100
+  { strutWidth = ScreenRatio 1
+  , strutHeight = ScreenRatio 1
   , strutXPadding = 0
   , strutYPadding = 0
   , strutMonitor = Nothing
@@ -62,12 +63,12 @@ buildStrutWindow StrutConfig
   monitorX <- Gdk.getRectangleX monitorGeometry
   monitorY <- Gdk.getRectangleY monitorGeometry
 
-  width <- case widthSize of
-             ExactSize w -> return w
-             Percentage p -> return $ (p * (monitorWidth - (2 * xpadding))) `div` 100
-  height <- case heightSize of
-              ExactSize h -> return h
-              Percentage p -> return $ (p * (monitorHeight - (2 * ypadding))) `div` 100
+  let width = case widthSize of
+                ExactSize w -> w
+                ScreenRatio p -> floor $ (p * fromIntegral (monitorWidth - (2 * xpadding)))
+      height = case heightSize of
+                 ExactSize h -> h
+                 ScreenRatio p -> floor $ (p * fromIntegral (monitorHeight - (2 * ypadding)))
 
   Gdk.setGeometryBaseWidth geometry width
   Gdk.setGeometryBaseHeight geometry height
@@ -91,9 +92,9 @@ buildStrutWindow StrutConfig
       (xPos, yPos) =
         case position of
           TopPos -> (xAligned, monitorY + ypadding)
-          BottomPos -> (xAligned, monitorY + monitorHeight - paddedHeight)
+          BottomPos -> (xAligned, monitorY + monitorHeight - height - ypadding)
           LeftPos -> (monitorX + xpadding, yAligned)
-          RightPos -> (monitorX + monitorWidth - paddedWidth, yAligned)
+          RightPos -> (monitorX + monitorWidth - width - xpadding, yAligned)
 
   Gtk.windowSetScreen window screen
   Gtk.windowMove window xPos yPos
