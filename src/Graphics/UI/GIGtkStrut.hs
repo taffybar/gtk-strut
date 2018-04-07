@@ -19,14 +19,25 @@ data StrutConfig = StrutConfig
   , strutHeight :: StrutSize
   , strutXPadding :: Int32
   , strutYPadding :: Int32
-  , strutMonitor :: Int32
+  , strutMonitor :: Maybe Int32
   , strutPosition :: StrutPosition
   , strutAlignment :: StrutAlignment
   , strutDisplayName :: Maybe Text
   }
 
-buildWindow :: MonadIO m => StrutConfig -> m Gtk.Window
-buildWindow StrutConfig
+defaultStrutConfig = StrutConfig
+  { strutWidth = Percentage 100
+  , strutHeight = Percentage 100
+  , strutXPadding = 0
+  , strutYPadding = 0
+  , strutMonitor = Nothing
+  , strutPosition = TopPos
+  , strutAlignment = Beginning
+  , strutDisplayName = Nothing
+  }
+
+buildStrutWindow :: MonadIO m => StrutConfig -> m Gtk.Window
+buildStrutWindow StrutConfig
               { strutWidth = widthSize
               , strutHeight = heightSize
               , strutXPadding = xpadding
@@ -37,7 +48,8 @@ buildWindow StrutConfig
               , strutDisplayName = displayName
               } = do
   Just display <- maybe Gdk.displayGetDefault Gdk.displayOpen displayName
-  Just monitor <- Gdk.displayGetMonitor display monitorNumber
+  Just monitor <- maybe (Gdk.displayGetPrimaryMonitor display)
+                  (Gdk.displayGetMonitor display) monitorNumber
   screen <- Gdk.displayGetDefaultScreen display
 
   window <- Gtk.windowNew Gtk.WindowTypeToplevel
