@@ -39,7 +39,13 @@ defaultStrutConfig = StrutConfig
   }
 
 buildStrutWindow :: MonadIO m => StrutConfig -> m Gtk.Window
-buildStrutWindow StrutConfig
+buildStrutWindow config = do
+  window <- Gtk.windowNew Gtk.WindowTypeToplevel
+  setupStrutWindow config window
+  return window
+
+setupStrutWindow :: MonadIO m => StrutConfig -> Gtk.Window -> m ()
+setupStrutWindow StrutConfig
               { strutWidth = widthSize
               , strutHeight = heightSize
               , strutXPadding = xpadding
@@ -48,7 +54,7 @@ buildStrutWindow StrutConfig
               , strutPosition = position
               , strutAlignment = alignment
               , strutDisplayName = displayName
-              } = do
+              } window = do
   Just display <- maybe Gdk.displayGetDefault Gdk.displayOpen displayName
   Just monitor <- maybe (Gdk.displayGetPrimaryMonitor display)
                   (Gdk.displayGetMonitor display) monitorNumber
@@ -61,7 +67,6 @@ buildStrutWindow StrutConfig
   screenHeight <- maximum <$> mapM getFullY allGeometries
   screen <- Gdk.displayGetDefaultScreen display
 
-  window <- Gtk.windowNew Gtk.WindowTypeToplevel
   Gtk.windowSetTypeHint window Gdk.WindowTypeHintDock
   geometry <- Gdk.newZeroGeometry
 
@@ -138,9 +143,7 @@ buildStrutWindow StrutConfig
           gdkWindow <- MaybeT $ Gtk.widgetGetWindow window
           lift $ setStrut gdkWindow ewmhSettings
 
-  Gtk.onWidgetRealize window setStrutProperties
-
-  return window
+  void $ Gtk.onWidgetRealize window setStrutProperties
 
 allHints =
   [ Gdk.WindowHintsMinSize
