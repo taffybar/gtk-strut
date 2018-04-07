@@ -25,7 +25,7 @@ data EWMHStrutSettings = EWMHStrutSettings
   , _top_end_x :: Int32
   , _bottom_start_x :: Int32
   , _bottom_end_x :: Int32
-  }
+  } deriving (Show, Eq)
 
 zeroStrutSettings = EWMHStrutSettings
   { _left = 0

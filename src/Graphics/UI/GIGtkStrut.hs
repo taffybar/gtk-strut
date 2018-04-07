@@ -1,19 +1,21 @@
 module Graphics.UI.GIGtkStrut where
 
+
 import           Control.Monad
 import           Control.Monad.IO.Class
 import           Control.Monad.Trans.Class
 import           Control.Monad.Trans.Maybe
 import           Data.Int
+import           Data.Maybe
 import           Data.Ratio
-import           Data.Text
+import qualified Data.Text as T
 import qualified GI.Gdk as Gdk
 import qualified GI.Gtk as Gtk
 import           Graphics.UI.EWMHStrut
 
-data StrutPosition = TopPos | BottomPos | LeftPos | RightPos
-data StrutAlignment = Beginning | Center | End
-data StrutSize = ExactSize Int32 | ScreenRatio Rational
+data StrutPosition = TopPos | BottomPos | LeftPos | RightPos deriving (Show, Read, Eq)
+data StrutAlignment = Beginning | Center | End deriving (Show, Read, Eq)
+data StrutSize = ExactSize Int32 | ScreenRatio Rational deriving (Show, Read, Eq)
 
 data StrutConfig = StrutConfig
   { strutWidth :: StrutSize
@@ -23,8 +25,8 @@ data StrutConfig = StrutConfig
   , strutMonitor :: Maybe Int32
   , strutPosition :: StrutPosition
   , strutAlignment :: StrutAlignment
-  , strutDisplayName :: Maybe Text
-  }
+  , strutDisplayName :: Maybe T.Text
+  } deriving (Show, Eq)
 
 defaultStrutConfig = StrutConfig
   { strutWidth = ScreenRatio 1
@@ -51,6 +53,13 @@ buildStrutWindow StrutConfig
   Just display <- maybe Gdk.displayGetDefault Gdk.displayOpen displayName
   Just monitor <- maybe (Gdk.displayGetPrimaryMonitor display)
                   (Gdk.displayGetMonitor display) monitorNumber
+  monitorCount <- Gdk.displayGetNMonitors display
+  allMonitors <- catMaybes <$> mapM (Gdk.displayGetMonitor display) [0..(monitorCount-1)]
+  allGeometries <- mapM Gdk.monitorGetGeometry allMonitors
+  let getFullY geometry = (+) <$> Gdk.getRectangleY geometry <*> Gdk.getRectangleHeight geometry
+      getFullX geometry = (+) <$> Gdk.getRectangleX geometry <*> Gdk.getRectangleWidth geometry
+  screenWidth <- maximum <$> mapM getFullX allGeometries
+  screenHeight <- maximum <$> mapM getFullY allGeometries
   screen <- Gdk.displayGetDefaultScreen display
 
   window <- Gtk.windowNew Gtk.WindowTypeToplevel
@@ -103,25 +112,25 @@ buildStrutWindow StrutConfig
         case position of
           TopPos ->
             zeroStrutSettings
-            { _top = paddedHeight
+            { _top = monitorY + paddedHeight
             , _top_start_x = xPos - xpadding
             , _top_end_x = xPos + width + xpadding
             }
           BottomPos ->
             zeroStrutSettings
-            { _bottom = paddedHeight
+            { _bottom = screenHeight - monitorY - monitorHeight + paddedHeight
             , _bottom_start_x = xPos - xpadding
             , _bottom_end_x = xPos + width + xpadding
             }
           LeftPos ->
             zeroStrutSettings
-            { _left = paddedWidth
+            { _left = monitorX + paddedWidth
             , _left_start_y = yPos - ypadding
             , _left_end_y = yPos + height + ypadding
             }
           RightPos ->
             zeroStrutSettings
-            { _right = paddedWidth
+            { _right = screenWidth - monitorX - monitorWidth + paddedWidth
             , _right_start_y = yPos - ypadding
             , _right_end_y = yPos + height + ypadding
             }
