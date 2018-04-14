@@ -78,10 +78,10 @@ setupStrutWindow StrutConfig
 
   let width = case widthSize of
                 ExactSize w -> w
-                ScreenRatio p -> floor $ (p * fromIntegral (monitorWidth - (2 * xpadding)))
+                ScreenRatio p -> floor $ p * fromIntegral (monitorWidth - (2 * xpadding))
       height = case heightSize of
                  ExactSize h -> h
-                 ScreenRatio p -> floor $ (p * fromIntegral (monitorHeight - (2 * ypadding)))
+                 ScreenRatio p -> floor $ p * fromIntegral (monitorHeight - (2 * ypadding))
 
   Gdk.setGeometryBaseWidth geometry width
   Gdk.setGeometryBaseHeight geometry height
@@ -92,8 +92,8 @@ setupStrutWindow StrutConfig
   Gtk.windowSetGeometryHints window (Nothing :: Maybe Gtk.Window)
        (Just geometry) allHints
 
-  let paddedHeight = (height + 2 * ypadding)
-      paddedWidth = (width + 2 * xpadding)
+  let paddedHeight = height + 2 * ypadding
+      paddedWidth = width + 2 * xpadding
       getAlignedPos dimensionPos dpadding monitorSize barSize =
         dimensionPos +
         case alignment of
