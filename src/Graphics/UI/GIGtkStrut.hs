@@ -58,6 +58,8 @@ setupStrutWindow StrutConfig
   Just display <- maybe Gdk.displayGetDefault Gdk.displayOpen displayName
   Just monitor <- maybe (Gdk.displayGetPrimaryMonitor display)
                   (Gdk.displayGetMonitor display) monitorNumber
+  screen <- Gdk.displayGetDefaultScreen display
+
   monitorCount <- Gdk.displayGetNMonitors display
   allMonitors <- catMaybes <$> mapM (Gdk.displayGetMonitor display) [0..(monitorCount-1)]
   allGeometries <- mapM Gdk.monitorGetGeometry allMonitors
@@ -65,7 +67,6 @@ setupStrutWindow StrutConfig
       getFullX geometry = (+) <$> Gdk.getRectangleX geometry <*> Gdk.getRectangleWidth geometry
   screenWidth <- maximum <$> mapM getFullX allGeometries
   screenHeight <- maximum <$> mapM getFullY allGeometries
-  screen <- Gdk.displayGetDefaultScreen display
 
   Gtk.windowSetTypeHint window Gdk.WindowTypeHintDock
   geometry <- Gdk.newZeroGeometry
