@@ -112,6 +112,7 @@ setupStrutWindow StrutConfig
 
   Gtk.windowSetScreen window screen
   Gtk.windowMove window xPos yPos
+  Gtk.windowSetKeepBelow window True
 
   let ewmhSettings =
         case position of
