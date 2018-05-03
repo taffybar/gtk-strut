@@ -120,25 +120,25 @@ setupStrutWindow StrutConfig
             zeroStrutSettings
             { _top = monitorY + paddedHeight
             , _top_start_x = xPos - xpadding
-            , _top_end_x = xPos + width + xpadding
+            , _top_end_x = xPos + width + xpadding - 1
             }
           BottomPos ->
             zeroStrutSettings
             { _bottom = screenHeight - monitorY - monitorHeight + paddedHeight
             , _bottom_start_x = xPos - xpadding
-            , _bottom_end_x = xPos + width + xpadding
+            , _bottom_end_x = xPos + width + xpadding - 1
             }
           LeftPos ->
             zeroStrutSettings
             { _left = monitorX + paddedWidth
             , _left_start_y = yPos - ypadding
-            , _left_end_y = yPos + height + ypadding
+            , _left_end_y = yPos + height + ypadding - 1
             }
           RightPos ->
             zeroStrutSettings
             { _right = screenWidth - monitorX - monitorWidth + paddedWidth
             , _right_start_y = yPos - ypadding
-            , _right_end_y = yPos + height + ypadding
+            , _right_end_y = yPos + height + ypadding - 1
             }
       setStrutProperties =
         void $ runMaybeT $ do
