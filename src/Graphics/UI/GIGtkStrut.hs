@@ -6,7 +6,6 @@ import           Control.Monad.Trans.Class
 import           Control.Monad.Trans.Maybe
 import           Data.Int
 import           Data.Maybe
-import           Data.Ratio
 import qualified Data.Text as T
 import qualified GI.Gdk as Gdk
 import qualified GI.Gtk as Gtk
@@ -147,6 +146,7 @@ setupStrutWindow StrutConfig
 
   void $ Gtk.onWidgetRealize window setStrutProperties
 
+allHints :: [Gdk.WindowHints]
 allHints =
   [ Gdk.WindowHintsMinSize
   , Gdk.WindowHintsMaxSize
