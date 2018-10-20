@@ -2,6 +2,7 @@ module Graphics.UI.GIGtkStrut where
 
 import           Control.Monad
 import           Control.Monad.IO.Class
+import           Control.Monad.Fail (MonadFail)
 import           Control.Monad.Trans.Class
 import           Control.Monad.Trans.Maybe
 import           Data.Int
@@ -37,13 +38,13 @@ defaultStrutConfig = StrutConfig
   , strutDisplayName = Nothing
   }
 
-buildStrutWindow :: MonadIO m => StrutConfig -> m Gtk.Window
+buildStrutWindow :: (MonadFail m, MonadIO m) => StrutConfig -> m Gtk.Window
 buildStrutWindow config = do
   window <- Gtk.windowNew Gtk.WindowTypeToplevel
   setupStrutWindow config window
   return window
 
-setupStrutWindow :: MonadIO m => StrutConfig -> Gtk.Window -> m ()
+setupStrutWindow :: (MonadFail m, MonadIO m) => StrutConfig -> Gtk.Window -> m ()
 setupStrutWindow StrutConfig
               { strutWidth = widthSize
               , strutHeight = heightSize
