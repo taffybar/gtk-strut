@@ -12,9 +12,15 @@ import qualified GI.Gdk as Gdk
 import qualified GI.Gtk as Gtk
 import           Graphics.UI.EWMHStrut
 
-data StrutPosition = TopPos | BottomPos | LeftPos | RightPos deriving (Show, Read, Eq)
-data StrutAlignment = Beginning | Center | End deriving (Show, Read, Eq)
-data StrutSize = ExactSize Int32 | ScreenRatio Rational deriving (Show, Read, Eq)
+data StrutPosition
+  = TopPos | BottomPos | LeftPos | RightPos
+    deriving (Show, Read, Eq)
+data StrutAlignment
+  = Beginning | Center | End
+    deriving (Show, Read, Eq)
+data StrutSize
+  = ExactSize Int32 | ScreenRatio Rational
+    deriving (Show, Read, Eq)
 
 data StrutConfig = StrutConfig
   { strutWidth :: StrutSize
@@ -61,10 +67,13 @@ setupStrutWindow StrutConfig
   screen <- Gdk.displayGetDefaultScreen display
 
   monitorCount <- Gdk.displayGetNMonitors display
-  allMonitors <- catMaybes <$> mapM (Gdk.displayGetMonitor display) [0..(monitorCount-1)]
+  allMonitors <- catMaybes <$> mapM (Gdk.displayGetMonitor display)
+                 [0..(monitorCount-1)]
   allGeometries <- mapM Gdk.monitorGetGeometry allMonitors
-  let getFullY geometry = (+) <$> Gdk.getRectangleY geometry <*> Gdk.getRectangleHeight geometry
-      getFullX geometry = (+) <$> Gdk.getRectangleX geometry <*> Gdk.getRectangleWidth geometry
+  let getFullY geometry = (+) <$> Gdk.getRectangleY geometry
+                              <*> Gdk.getRectangleHeight geometry
+      getFullX geometry = (+) <$> Gdk.getRectangleX geometry
+                              <*> Gdk.getRectangleWidth geometry
   screenWidth <- maximum <$> mapM getFullX allGeometries
   screenHeight <- maximum <$> mapM getFullY allGeometries
 
@@ -77,12 +86,16 @@ setupStrutWindow StrutConfig
   monitorX <- Gdk.getRectangleX monitorGeometry
   monitorY <- Gdk.getRectangleY monitorGeometry
 
-  let width = case widthSize of
-                ExactSize w -> w
-                ScreenRatio p -> floor $ p * fromIntegral (monitorWidth - (2 * xpadding))
-      height = case heightSize of
-                 ExactSize h -> h
-                 ScreenRatio p -> floor $ p * fromIntegral (monitorHeight - (2 * ypadding))
+  let width =
+        case widthSize of
+          ExactSize w -> w
+          ScreenRatio p ->
+            floor $ p * fromIntegral (monitorWidth - (2 * xpadding))
+      height =
+        case heightSize of
+          ExactSize h -> h
+          ScreenRatio p ->
+            floor $ p * fromIntegral (monitorHeight - (2 * ypadding))
 
   Gdk.setGeometryBaseWidth geometry width
   Gdk.setGeometryBaseHeight geometry height
