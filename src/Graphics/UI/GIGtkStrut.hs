@@ -77,7 +77,6 @@ setupStrutWindow StrutConfig
   screenWidth <- maximum <$> mapM getFullX allGeometries
   screenHeight <- maximum <$> mapM getFullY allGeometries
 
-  Gtk.windowSetTypeHint window Gdk.WindowTypeHintDock
   geometry <- Gdk.newZeroGeometry
 
   monitorGeometry <- Gdk.monitorGetGeometry monitor
@@ -123,6 +122,7 @@ setupStrutWindow StrutConfig
           LeftPos -> (monitorX + xpadding, yAligned)
           RightPos -> (monitorX + monitorWidth - width - xpadding, yAligned)
 
+  Gtk.windowSetTypeHint window Gdk.WindowTypeHintDock
   Gtk.windowSetScreen window screen
   Gtk.windowMove window xPos yPos
   Gtk.windowSetKeepBelow window True
