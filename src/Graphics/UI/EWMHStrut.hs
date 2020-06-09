@@ -42,6 +42,22 @@ zeroStrutSettings = EWMHStrutSettings
   , _bottom_end_x = 0
   }
 
+scaleStrutSettings :: Int32 -> EWMHStrutSettings -> EWMHStrutSettings
+scaleStrutSettings scaleFactor st = st 
+  { _left = _left st * scaleFactor
+  , _right = _right st * scaleFactor
+  , _top = _top st * scaleFactor
+  , _bottom = _bottom st * scaleFactor
+  , _left_start_y = _left_start_y st * scaleFactor
+  , _left_end_y = _left_end_y st * scaleFactor
+  , _right_start_y = _right_start_y st * scaleFactor
+  , _right_end_y = _right_end_y st * scaleFactor
+  , _top_start_x = _top_start_x st * scaleFactor
+  , _top_end_x = _top_end_x st * scaleFactor
+  , _bottom_start_x = _bottom_start_x st * scaleFactor
+  , _bottom_end_x = _bottom_end_x st * scaleFactor
+  }
+
 strutSettingsToPtr :: MonadIO m => EWMHStrutSettings -> m (Ptr CULong)
 strutSettingsToPtr EWMHStrutSettings
                      { _left = left
