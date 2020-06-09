@@ -80,6 +80,7 @@ setupStrutWindow StrutConfig
   geometry <- Gdk.newZeroGeometry
 
   monitorGeometry <- Gdk.monitorGetGeometry monitor
+  monitorScaleFactor <- Gdk.monitorGetScaleFactor monitor
   monitorWidth <- Gdk.getRectangleWidth monitorGeometry
   monitorHeight <- Gdk.getRectangleHeight monitorGeometry
   monitorX <- Gdk.getRectangleX monitorGeometry
@@ -156,7 +157,8 @@ setupStrutWindow StrutConfig
       setStrutProperties =
         void $ runMaybeT $ do
           gdkWindow <- MaybeT $ Gtk.widgetGetWindow window
-          lift $ setStrut gdkWindow ewmhSettings
+          lift $ setStrut gdkWindow $ 
+              scaleStrutSettings monitorScaleFactor ewmhSettings
 
   void $ Gtk.onWidgetRealize window setStrutProperties
 
