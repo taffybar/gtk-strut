@@ -43,7 +43,7 @@ zeroStrutSettings = EWMHStrutSettings
   }
 
 scaleStrutSettings :: Int32 -> EWMHStrutSettings -> EWMHStrutSettings
-scaleStrutSettings scaleFactor st = st 
+scaleStrutSettings scaleFactor st = st
   { _left = _left st * scaleFactor
   , _right = _right st * scaleFactor
   , _top = _top st * scaleFactor
