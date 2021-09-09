@@ -15,9 +15,11 @@ import           Graphics.UI.EWMHStrut
 data StrutPosition
   = TopPos | BottomPos | LeftPos | RightPos
     deriving (Show, Read, Eq)
+
 data StrutAlignment
   = Beginning | Center | End
     deriving (Show, Read, Eq)
+
 data StrutSize
   = ExactSize Int32 | ScreenRatio Rational
     deriving (Show, Read, Eq)
@@ -157,7 +159,7 @@ setupStrutWindow StrutConfig
       setStrutProperties =
         void $ runMaybeT $ do
           gdkWindow <- MaybeT $ Gtk.widgetGetWindow window
-          lift $ setStrut gdkWindow $ 
+          lift $ setStrut gdkWindow $
               scaleStrutSettings monitorScaleFactor ewmhSettings
 
   void $ Gtk.onWidgetRealize window setStrutProperties
