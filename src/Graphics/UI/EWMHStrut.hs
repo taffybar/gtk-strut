@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE MonoLocalBinds #-}
 module Graphics.UI.EWMHStrut where
 
 import           Control.Monad.IO.Class
