@@ -1,4 +1,11 @@
-module Graphics.UI.GIGtkStrut where
+module Graphics.UI.GIGtkStrut
+  ( defaultStrutConfig
+  , StrutPosition(..)
+  , StrutSize(..)
+  , StrutAlignment(..)
+  , buildStrutWindow
+  , setupStrutWindow
+  ) where
 
 import           Control.Monad
 import           Control.Monad.IO.Class
