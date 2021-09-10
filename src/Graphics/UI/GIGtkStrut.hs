@@ -3,6 +3,7 @@ module Graphics.UI.GIGtkStrut
   , StrutPosition(..)
   , StrutSize(..)
   , StrutAlignment(..)
+  , StrutConfig(..)
   , buildStrutWindow
   , setupStrutWindow
   ) where
