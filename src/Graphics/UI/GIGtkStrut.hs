@@ -8,16 +8,22 @@ module Graphics.UI.GIGtkStrut
   ) where
 
 import           Control.Monad
-import           Control.Monad.IO.Class
 import           Control.Monad.Fail (MonadFail)
+import           Control.Monad.IO.Class
 import           Control.Monad.Trans.Class
 import           Control.Monad.Trans.Maybe
+import           Data.Default
 import           Data.Int
 import           Data.Maybe
 import qualified Data.Text as T
 import qualified GI.Gdk as Gdk
 import qualified GI.Gtk as Gtk
 import           Graphics.UI.EWMHStrut
+import           System.Log.Logger
+import           Text.Printf
+
+strutLog :: MonadIO m => Priority -> String -> m ()
+strutLog p s = liftIO $ logM "Graphics.UI.GIGtkStrut" p s
 
 data StrutPosition
   = TopPos | BottomPos | LeftPos | RightPos
@@ -53,12 +59,30 @@ defaultStrutConfig = StrutConfig
   , strutDisplayName = Nothing
   }
 
+instance Default StrutConfig where
+  def =
+    StrutConfig
+    { strutWidth = ScreenRatio 1
+    , strutHeight = ScreenRatio 1
+    , strutXPadding = 0
+    , strutYPadding = 0
+    , strutMonitor = Nothing
+    , strutPosition = TopPos
+    , strutAlignment = Beginning
+    , strutDisplayName = Nothing
+    }
+
+
+-- | Build a strut window to the specifications provided by the 'StrutConfig'
+-- argument.
 buildStrutWindow :: (MonadFail m, MonadIO m) => StrutConfig -> m Gtk.Window
 buildStrutWindow config = do
   window <- Gtk.windowNew Gtk.WindowTypeToplevel
   setupStrutWindow config window
   return window
 
+-- | Configure the provided 'Gtk.Window' so that it has the properties specified
+-- by the 'StrutConfig' argument.
 setupStrutWindow :: (MonadFail m, MonadIO m) => StrutConfig -> Gtk.Window -> m ()
 setupStrutWindow StrutConfig
                    { strutWidth = widthSize
@@ -169,11 +193,26 @@ setupStrutWindow StrutConfig
             , _right_start_y = yPos - ypadding
             , _right_end_y = yPos + height + ypadding - 1
             }
+      scaledStrutSettings = scaleStrutSettings monitorScaleFactor ewmhSettings
       setStrutProperties =
         void $ runMaybeT $ do
           gdkWindow <- MaybeT $ Gtk.widgetGetWindow window
-          lift $ setStrut gdkWindow $
-              scaleStrutSettings monitorScaleFactor ewmhSettings
+          lift $ setStrut gdkWindow scaledStrutSettings
+      logPairs =
+        [ ("width", show width)
+        , ("height", show height)
+        , ("xPos", show xPos)
+        , ("yPos", show yPos)
+        , ("paddedWidth", show paddedWidth)
+        , ("paddedHeight", show paddedHeight)
+        , ("monitorWidth", show monitorWidth)
+        , ("monitorHeight", show monitorHeight)
+        , ("monitorX", show monitorX)
+        , ("monitorY", show monitorY)
+        , ("strutSettings", show ewmhSettings)
+        , ("scaledStrutSettings", show scaledStrutSettings)
+        ]
+  mapM_ (\(name, value) -> strutLog INFO $ printf "%s: %s" name value) logPairs
 
   void $ Gtk.onWidgetRealize window setStrutProperties
 
