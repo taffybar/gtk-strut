@@ -24,6 +24,9 @@
   rec {
     devShell = pkgs.haskellPackages.shellFor {
       packages = p: [ p.gtk-strut ];
+      nativeBuildInputs = with pkgs.haskellPackages; [
+        cabal-install hlint ghcid ormolu implicit-hie haskell-language-server
+      ];
     };
     defaultPackage = pkgs.haskellPackages.gtk-strut;
   }) // { inherit overlay overlays; } ;
