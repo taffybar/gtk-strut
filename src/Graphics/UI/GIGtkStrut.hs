@@ -216,7 +216,7 @@ setupStrutWindow StrutConfig
         ]
 
   strutLog DEBUG "Properties:"
-  mapM_ (\(name, value) -> strutLog DEBUG $ printf "%s: %s" name value) logPairs
+  mapM_ (\(name, value) -> strutLog WARNING $ printf "%s: %s" name value) logPairs
 
   void $ Gtk.onWidgetRealize window setStrutProperties
 
