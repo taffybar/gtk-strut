@@ -95,6 +95,7 @@ setupStrutWindow StrutConfig
                    , strutAlignment = alignment
                    , strutDisplayName = displayName
                    } window = do
+  strutLog DEBUG "Starting strut window setup"
   Just display <- maybe Gdk.displayGetDefault Gdk.displayOpen displayName
   Just monitor <- maybe (Gdk.displayGetPrimaryMonitor display)
                   (Gdk.displayGetMonitor display) monitorNumber
@@ -213,7 +214,9 @@ setupStrutWindow StrutConfig
         , ("strutSettings", show ewmhSettings)
         , ("scaledStrutSettings", show scaledStrutSettings)
         ]
-  mapM_ (\(name, value) -> strutLog INFO $ printf "%s: %s" name value) logPairs
+
+  strutLog DEBUG "Properties:"
+  mapM_ (\(name, value) -> strutLog DEBUG $ printf "%s: %s" name value) logPairs
 
   void $ Gtk.onWidgetRealize window setStrutProperties
 
