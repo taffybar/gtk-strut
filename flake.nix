@@ -2,7 +2,7 @@
   description = "gtk-strut";
   inputs = {
     flake-utils.url = "github:numtide/flake-utils";
-    git-ignore-nix.url = "github:IvanMalison/gitignore.nix/master";
+    git-ignore-nix.url = github:hercules-ci/gitignore.nix/master;
   };
   outputs = { self, flake-utils, nixpkgs, git-ignore-nix }:
   let
@@ -12,7 +12,7 @@
         (hself: hsuper: {
           gtk-strut =
             hself.callCabal2nix "gtk-strut"
-            (git-ignore-nix.gitIgnoreSource ./.)
+            (git-ignore-nix.lib.gitignoreSource ./.)
             { };
         });
       });
