@@ -216,10 +216,6 @@ setupStrutWindow StrutConfig
         , ("scaledStrutSettings", show scaledStrutSettings)
         ]
 
-  strutLog DEBUG "Properties:"
-  mapM_ (\(name, value) -> strutLog WARNING $ printf "%s: %s" name value) logPairs
-  mapM_ (\(name, value) -> liftIO $ putStrLn $ printf "%s: %s" name value) logPairs
-
   void $ Gtk.onWidgetRealize window setStrutProperties
 
 allHints :: [Gdk.WindowHints]
