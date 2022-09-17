@@ -18,8 +18,8 @@ description:         Please see the README on Github at <https://github.com/Ivan
 dependencies:
 - base >= 4.7 && < 5
 - data-default
-- gi-gdk
-- gi-gtk
+- gi-gdk >= 3.0.25 && < 4
+- gi-gtk >= 3.0.38 && < 4
 - hslogger
 - text
 - transformers
